@@ -1,7 +1,7 @@
 {
   "name": "gemini-mcp-server",
-  "version": "1.0.0",
-  "description": "Custom Gemini MCP server - chat, vision, code exec, embeddings, search grounding",
+  "version": "2.0.0",
+  "description": "Custom Gemini MCP server - chat, vision, code exec, embeddings, search grounding, URL context, deep research",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
-    "@google/generative-ai": "^0.24.0",
+    "@google/genai": "^1.0.0",
     "zod": "^3.24.0"
   }
 }

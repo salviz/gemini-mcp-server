@@ -7,8 +7,8 @@ import { registerUtilityTools } from './tools/utility.js';
 
 const server = new McpServer({
   name: 'gemini-mcp-server',
-  version: '1.0.0',
-  description: 'Custom Gemini MCP server - chat, vision, code execution, embeddings, search grounding',
+  version: '2.0.0',
+  description: 'Custom Gemini MCP server - chat, vision, code execution, embeddings, search grounding, URL context, deep research',
 });
 
 registerChatTools(server);
