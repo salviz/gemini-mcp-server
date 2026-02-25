@@ -24,7 +24,10 @@ function sendNotification(title, content) {
     '--title', title,
     '--content', content.slice(0, 500),
     '--id', 'gemini-research',
+    '--group', 'gemini',
     '--priority', 'high',
+    '--button1', 'Dismiss',
+    '--button1-action', 'termux-notification-remove gemini-research',
   ], (err) => {
     if (err) process.stderr.write(`Notification error: ${err.message}\n`);
   });
@@ -497,7 +500,7 @@ export function registerChatTools(server) {
   // 11. gemini_deep_research - Start deep research (returns ID for polling)
   server.tool(
     'gemini_deep_research',
-    'Start a deep research task using Gemini Deep Research. Returns an interaction ID. Use gemini_check_research to poll for results.',
+    'Start a deep research task using Gemini Deep Research. Returns an interaction ID. Then call gemini_check_research with wait=true in the background to get notified when complete.',
     {
       query: z.string().describe('The research query or question'),
     },
@@ -540,27 +543,38 @@ export function registerChatTools(server) {
     }
   );
 
-  // 12. gemini_check_research - Check status of a deep research task
+  // 12. gemini_check_research - Check or wait for deep research results
   server.tool(
     'gemini_check_research',
-    'Check the status of a running deep research task by interaction ID',
+    'Check or wait for deep research results. Use wait=true to block until completion (ideal for background execution — the tool returns when research finishes, triggering a task notification in your AI client).',
     {
       interactionId: z.string().describe('The interaction ID returned by gemini_deep_research'),
+      wait: z.boolean().optional().describe('If true, block and poll until research completes (default: false, single check)'),
+      timeoutMinutes: z.coerce.number().optional().describe('Max wait time in minutes when wait=true (default: 30)'),
     },
-    async ({ interactionId }) => {
+    async ({ interactionId, wait, timeoutMinutes }) => {
       try {
-        const result = await ai.interactions.get(interactionId);
-        const state = result.status;
+        const maxMinutes = timeoutMinutes || 30;
+        const maxAttempts = wait ? Math.ceil((maxMinutes * 60) / 30) : 1;
 
-        if (state === 'completed') {
-          const text = extractOutputText(result);
-          return success(`Deep Research Complete:\n\n${text}`);
-        }
-        if (state === 'failed' || state === 'cancelled') {
-          return error(new Error(`Deep research ${state}: ${JSON.stringify(result)}`));
+        for (let i = 0; i < maxAttempts; i++) {
+          if (i > 0) await new Promise(r => setTimeout(r, 30000));
+
+          const result = await ai.interactions.get(interactionId);
+
+          if (result.status === 'completed') {
+            const text = extractOutputText(result);
+            return success(`Deep Research Complete:\n\n${text}`);
+          }
+          if (result.status === 'failed' || result.status === 'cancelled') {
+            return error(new Error(`Deep research ${result.status}: ${JSON.stringify(result)}`));
+          }
         }
 
-        return success(`Deep research still running.\nStatus: ${state}\nInteraction ID: ${interactionId}\n\nTry again in a minute.`);
+        if (wait) {
+          return success(`Deep research did not complete within ${maxMinutes} minutes.\nStatus: in_progress\nInteraction ID: ${interactionId}`);
+        }
+        return success(`Deep research still running.\nStatus: in_progress\nInteraction ID: ${interactionId}\n\nUse wait=true to block until completion.`);
       } catch (e) {
         return error(e);
       }
