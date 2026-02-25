@@ -1,11 +1,35 @@
 {
-  "name": "gemini-mcp-server",
+  "name": "@salviz/gemini-mcp-server",
   "version": "2.0.0",
-  "description": "Custom Gemini MCP server - chat, vision, code exec, embeddings, search grounding, URL context, deep research",
+  "description": "MCP server with 23 tools for Google Gemini API — chat, multimodal analysis, deep research, YouTube, Files API, embeddings, and more",
   "main": "index.js",
   "type": "module",
+  "bin": {
+    "gemini-mcp-server": "./index.js"
+  },
   "scripts": {
     "start": "node index.js"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "gemini",
+    "google-gemini",
+    "ai",
+    "llm",
+    "model-context-protocol",
+    "deep-research",
+    "multimodal"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/salviz/gemini-mcp-server.git"
+  },
+  "author": "salviz",
+  "license": "MIT",
+  "homepage": "https://github.com/salviz/gemini-mcp-server",
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
